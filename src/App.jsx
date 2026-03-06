@@ -445,7 +445,17 @@ const [res,setRes]=useState(null)
 
 const calc=()=>{
 
-const speed=oldTime/newTime
+const oldT=parseFloat(oldTime)
+const newT=parseFloat(newTime)
+
+if(!oldT || !newT || newT<=0){
+
+setRes("Invalid input")
+
+return
+}
+
+const speed=oldT/newT
 
 setRes(speed.toFixed(2))
 
@@ -455,17 +465,36 @@ return(
 
 <div className="form-content">
 
-<input placeholder={t.old} onChange={e=>setOld(e.target.value)}/>
-<input placeholder={t.new} onChange={e=>setNew(e.target.value)}/>
+<input
+type="number"
+placeholder={t.old}
+onChange={e=>setOld(e.target.value)}
+/>
+
+<input
+type="number"
+placeholder={t.new}
+onChange={e=>setNew(e.target.value)}
+/>
 
 <button className="calc-button" onClick={calc}>
 Calculate
 </button>
 
 {res &&
+
 <div className="result-card">
-Speedup: {res}x
+
+<p>Speedup: <strong>{res}x</strong></p>
+
+{res !== "Invalid input" &&
+<p>
+Performance improved by {( (res-1)*100 ).toFixed(1)}%
+</p>
+}
+
 </div>
+
 }
 
 </div>
