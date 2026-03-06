@@ -1,31 +1,10 @@
-import { useState } from 'react'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
 
-import {
-Chart as ChartJS,
-CategoryScale,
-LinearScale,
-BarElement,
-ArcElement,
-Tooltip,
-Legend
-} from 'chart.js'
+function App() {
 
-import { Bar, Pie } from 'react-chartjs-2'
-
-ChartJS.register(
-CategoryScale,
-LinearScale,
-BarElement,
-ArcElement,
-Tooltip,
-Legend
-)
-
-function App(){
-
-const [lang,setLang]=useState("EN")
 const [theme,setTheme]=useState("dark")
+const [lang,setLang]=useState("EN")
 const [mode,setMode]=useState(1)
 
 const t={
@@ -33,23 +12,25 @@ const t={
 EN:{
 title:"CPU Performance Analyzer",
 
-m1:"Single CPU",
-m2:"Compare CPUs",
-m3:"Amdahl Law",
-m4:"MIPS Calculator",
-m5:"Instruction Mix",
-m6:"CPU Ranking",
-m7:"Performance Simulator",
-m8:"Pipeline Simulator",
+single:"Single CPU",
+compare:"Compare CPUs",
+amdahl:"Amdahl Law",
+mips:"MIPS Calculator",
+mix:"Instruction Mix",
+rank:"CPU Ranking",
+sim:"Performance Simulator",
+pipe:"Pipeline Simulator",
 
 instr:"Instruction Count",
 cpi:"CPI",
 clock:"Clock Rate (GHz)",
 
-cpu1:"CPU1 Time",
-cpu2:"CPU2 Time",
+calc:"Calculate",
 
-portion:"Optimized Portion %",
+cpu1:"CPU 1 Time",
+cpu2:"CPU 2 Time",
+
+portion:"Optimized %",
 speed:"Speedup",
 
 alu:"ALU instructions",
@@ -72,24 +53,26 @@ lang:"TH"
 TH:{
 title:"เครื่องมือวิเคราะห์ประสิทธิภาพ CPU",
 
-m1:"วิเคราะห์ CPU",
-m2:"เปรียบเทียบ CPU",
-m3:"กฎของ Amdahl",
-m4:"คำนวณ MIPS",
-m5:"วิเคราะห์ CPI",
-m6:"จัดอันดับ CPU",
-m7:"จำลองประสิทธิภาพ",
-m8:"จำลอง Pipeline",
+single:"วิเคราะห์ CPU",
+compare:"เปรียบเทียบ CPU",
+amdahl:"กฎของ Amdahl",
+mips:"คำนวณ MIPS",
+mix:"วิเคราะห์ CPI",
+rank:"จัดอันดับ CPU",
+sim:"จำลองประสิทธิภาพ",
+pipe:"จำลอง Pipeline",
 
 instr:"จำนวนคำสั่ง",
 cpi:"ค่า CPI",
 clock:"ความถี่ (GHz)",
 
-cpu1:"เวลา CPU1",
-cpu2:"เวลา CPU2",
+calc:"คำนวณ",
+
+cpu1:"เวลา CPU 1",
+cpu2:"เวลา CPU 2",
 
 portion:"ส่วนที่ปรับปรุง %",
-speed:"ความเร็วที่เพิ่ม",
+speed:"ความเร็ว",
 
 alu:"คำสั่ง ALU",
 mem:"คำสั่ง Memory",
@@ -138,14 +121,14 @@ onClick={()=>setTheme(theme==="dark"?"light":"dark")}
 
 <div className="menu-buttons">
 
-<button onClick={()=>setMode(1)} className={mode===1?'active':''}>{t.m1}</button>
-<button onClick={()=>setMode(2)} className={mode===2?'active':''}>{t.m2}</button>
-<button onClick={()=>setMode(3)} className={mode===3?'active':''}>{t.m3}</button>
-<button onClick={()=>setMode(4)} className={mode===4?'active':''}>{t.m4}</button>
-<button onClick={()=>setMode(5)} className={mode===5?'active':''}>{t.m5}</button>
-<button onClick={()=>setMode(6)} className={mode===6?'active':''}>{t.m6}</button>
-<button onClick={()=>setMode(7)} className={mode===7?'active':''}>{t.m7}</button>
-<button onClick={()=>setMode(8)} className={mode===8?'active':''}>{t.m8}</button>
+<button onClick={()=>setMode(1)} className={mode===1?'active':''}>{t.single}</button>
+<button onClick={()=>setMode(2)} className={mode===2?'active':''}>{t.compare}</button>
+<button onClick={()=>setMode(3)} className={mode===3?'active':''}>{t.amdahl}</button>
+<button onClick={()=>setMode(4)} className={mode===4?'active':''}>{t.mips}</button>
+<button onClick={()=>setMode(5)} className={mode===5?'active':''}>{t.mix}</button>
+<button onClick={()=>setMode(6)} className={mode===6?'active':''}>{t.rank}</button>
+<button onClick={()=>setMode(7)} className={mode===7?'active':''}>{t.sim}</button>
+<button onClick={()=>setMode(8)} className={mode===8?'active':''}>{t.pipe}</button>
 
 </div>
 
@@ -154,9 +137,6 @@ onClick={()=>setTheme(theme==="dark"?"light":"dark")}
 {mode===1 && <SingleCPU t={t}/>}
 {mode===2 && <CompareCPU t={t}/>}
 {mode===3 && <AmdahlLaw t={t}/>}
-{mode===4 && <MIPSCalculator t={t}/>}
-{mode===5 && <CPIAnalyzer t={t}/>}
-{mode===6 && <CPURanking t={t}/>}
 {mode===7 && <PerformanceSimulator t={t}/>}
 {mode===8 && <PipelineSimulator t={t}/>}
 
@@ -188,47 +168,25 @@ setRes({cycles,time})
 
 }
 
-const chartData=res && {
-
-labels:["Cycles","CPU Time"],
-
-datasets:[{
-
-data:[res.cycles,res.time],
-backgroundColor:["#3b82f6","#22c55e"]
-
-}]
-
-}
-
 return(
 
 <div className="form-content">
 
-<input placeholder={t.instr} type="number"
-onChange={e=>setVals({...vals,i:e.target.value})}/>
-
-<input placeholder={t.cpi} type="number"
-onChange={e=>setVals({...vals,cpi:e.target.value})}/>
-
-<input placeholder={t.clock} type="number"
-onChange={e=>setVals({...vals,ghz:e.target.value})}/>
+<input placeholder={t.instr} onChange={e=>setVals({...vals,i:e.target.value})}/>
+<input placeholder={t.cpi} onChange={e=>setVals({...vals,cpi:e.target.value})}/>
+<input placeholder={t.clock} onChange={e=>setVals({...vals,ghz:e.target.value})}/>
 
 <button className="calc-button" onClick={calc}>
-Calculate
+{t.calc}
 </button>
 
 {res &&
-
 <div className="result-card">
 
-<p>Cycles: {res.cycles.toFixed(2)}</p>
-<p>CPU Time: {res.time.toFixed(6)}</p>
-
-<Bar data={chartData}/>
+<p>Cycles: {res.cycles}</p>
+<p>CPU Time: {res.time}</p>
 
 </div>
-
 }
 
 </div>
@@ -239,8 +197,8 @@ Calculate
 
 function CompareCPU({t}){
 
-const [t1,setT1]=useState('')
-const [t2,setT2]=useState('')
+const [t1,setT1]=useState("")
+const [t2,setT2]=useState("")
 const [res,setRes]=useState(null)
 
 const calc=()=>{
@@ -262,7 +220,7 @@ return(
 <input placeholder={t.cpu2} onChange={e=>setT2(e.target.value)}/>
 
 <button className="calc-button" onClick={calc}>
-Calculate
+{t.calc}
 </button>
 
 {res && <div className="result-card">{res}</div>}
@@ -293,14 +251,11 @@ return(
 
 <div className="form-content">
 
-<input placeholder={t.portion}
-onChange={e=>setVals({...vals,f:e.target.value})}/>
-
-<input placeholder={t.speed}
-onChange={e=>setVals({...vals,s:e.target.value})}/>
+<input placeholder={t.portion} onChange={e=>setVals({...vals,f:e.target.value})}/>
+<input placeholder={t.speed} onChange={e=>setVals({...vals,s:e.target.value})}/>
 
 <button className="calc-button" onClick={calc}>
-Calculate
+{t.calc}
 </button>
 
 {res && <div className="result-card">Speedup: {res}x</div>}
@@ -311,136 +266,10 @@ Calculate
 
 }
 
-function MIPSCalculator({t}){
-
-const [vals,setVals]=useState({cpi:'',ghz:''})
-const [res,setRes]=useState(null)
-
-const calc=()=>{
-
-const cpi=parseFloat(vals.cpi)
-const ghz=parseFloat(vals.ghz)
-
-const mips=(ghz*1000)/cpi
-
-setRes(mips.toFixed(2))
-
-}
-
-return(
-
-<div className="form-content">
-
-<input placeholder={t.cpi}
-onChange={e=>setVals({...vals,cpi:e.target.value})}/>
-
-<input placeholder={t.clock}
-onChange={e=>setVals({...vals,ghz:e.target.value})}/>
-
-<button className="calc-button" onClick={calc}>
-Calculate
-</button>
-
-{res && <div className="result-card">MIPS: {res}</div>}
-
-</div>
-
-)
-
-}
-
-function CPIAnalyzer({t}){
-
-const [vals,setVals]=useState({a:'',b:'',c:''})
-const [res,setRes]=useState(null)
-
-const calc=()=>{
-
-const a=parseFloat(vals.a)
-const b=parseFloat(vals.b)
-const c=parseFloat(vals.c)
-
-const data={
-labels:["ALU","Memory","Branch"],
-datasets:[{
-data:[a,b,c],
-backgroundColor:["#3b82f6","#22c55e","#f97316"]
-}]
-}
-
-setRes(data)
-
-}
-
-return(
-
-<div className="form-content">
-
-<input placeholder={t.alu} onChange={e=>setVals({...vals,a:e.target.value})}/>
-<input placeholder={t.mem} onChange={e=>setVals({...vals,b:e.target.value})}/>
-<input placeholder={t.branch} onChange={e=>setVals({...vals,c:e.target.value})}/>
-
-<button className="calc-button" onClick={calc}>
-Calculate
-</button>
-
-{res &&
-<div className="result-card">
-
-<Pie data={res}/>
-
-</div>
-}
-
-</div>
-
-)
-
-}
-
-function CPURanking({t}){
-
-const [cpus,setCpus]=useState([])
-const [name,setName]=useState('')
-const [time,setTime]=useState('')
-
-const add=()=>{
-
-setCpus([...cpus,{name,time:parseFloat(time)}])
-
-}
-
-const sorted=[...cpus].sort((a,b)=>a.time-b.time)
-
-return(
-
-<div className="form-content">
-
-<input placeholder={t.name} onChange={e=>setName(e.target.value)}/>
-<input placeholder={t.time} onChange={e=>setTime(e.target.value)}/>
-
-<button className="calc-button" onClick={add}>
-{t.add}
-</button>
-
-<div className="result-card">
-
-{sorted.map((c,i)=>(
-<p key={i}>{i+1}. {c.name} - {c.time}s</p>
-))}
-
-</div>
-
-</div>
-
-)
-
-}
-
 function PerformanceSimulator({t}){
 
-const [oldTime,setOld]=useState('')
-const [newTime,setNew]=useState('')
+const [oldTime,setOld]=useState("")
+const [newTime,setNew]=useState("")
 const [res,setRes]=useState(null)
 
 const calc=()=>{
@@ -448,12 +277,7 @@ const calc=()=>{
 const oldT=parseFloat(oldTime)
 const newT=parseFloat(newTime)
 
-if(!oldT || !newT || newT<=0){
-
-setRes("Invalid input")
-
-return
-}
+if(!oldT||!newT)return
 
 const speed=oldT/newT
 
@@ -465,36 +289,17 @@ return(
 
 <div className="form-content">
 
-<input
-type="number"
-placeholder={t.old}
-onChange={e=>setOld(e.target.value)}
-/>
-
-<input
-type="number"
-placeholder={t.new}
-onChange={e=>setNew(e.target.value)}
-/>
+<input placeholder={t.old} onChange={e=>setOld(e.target.value)}/>
+<input placeholder={t.new} onChange={e=>setNew(e.target.value)}/>
 
 <button className="calc-button" onClick={calc}>
-Calculate
+{t.calc}
 </button>
 
 {res &&
-
 <div className="result-card">
-
-<p>Speedup: <strong>{res}x</strong></p>
-
-{res !== "Invalid input" &&
-<p>
-Performance improved by {( (res-1)*100 ).toFixed(1)}%
-</p>
-}
-
+Speedup: {res}x
 </div>
-
 }
 
 </div>
@@ -507,30 +312,19 @@ function PipelineSimulator({t}){
 
 const stages=["IF","ID","EX","MEM","WB"]
 
-const [instructions,setInstructions]=useState([
-["ADD"],
-["SUB"],
-["LW"],
-["SW"]
-])
+const instructions=["ADD","SUB","LW","SW"]
 
 const [cycle,setCycle]=useState(0)
-
-const nextCycle=()=>{
-setCycle(cycle+1)
-}
 
 return(
 
 <div>
 
-<button className="calc-button" onClick={nextCycle}>
+<button className="calc-button" onClick={()=>setCycle(cycle+1)}>
 {t.next}
 </button>
 
-<div className="result-card">
-
-<table style={{width:"100%",textAlign:"center"}}>
+<table>
 
 <thead>
 <tr>
@@ -541,9 +335,7 @@ return(
 
 <tbody>
 
-{instructions.map((ins,i)=>{
-
-return(
+{instructions.map((ins,i)=>(
 
 <tr key={i}>
 
@@ -554,7 +346,7 @@ return(
 const active=cycle===i+j
 
 return(
-<td key={j} style={{background:active?"#3b82f6":""}}>
+<td key={j} className={active?"pipeline-active":""}>
 {active?"●":""}
 </td>
 )
@@ -563,15 +355,11 @@ return(
 
 </tr>
 
-)
-
-})}
+))}
 
 </tbody>
 
 </table>
-
-</div>
 
 </div>
 
