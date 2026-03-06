@@ -28,6 +28,7 @@ const [lang,setLang]=useState("EN")
 const [theme,setTheme]=useState("dark")
 const [mode,setMode]=useState(1)
 
+// เพิ่มคำแปลคำว่า equal เข้าไปตรงนี้ครับโบร
 const t={
 
 EN:{
@@ -65,6 +66,8 @@ old:"Old CPU Time",
 new:"New CPU Time",
 
 next:"Next Cycle",
+
+equal:"Both CPUs are equal in speed", // <-- เพิ่มตรงนี้
 
 lang:"TH"
 },
@@ -104,6 +107,8 @@ old:"เวลาเดิม",
 new:"เวลาใหม่",
 
 next:"รอบถัดไป",
+
+equal:"ความเร็วเท่ากัน", // <-- เพิ่มตรงนี้
 
 lang:"EN"
 }
@@ -193,12 +198,18 @@ const chartData=res && {
 labels:["Cycles","CPU Time"],
 
 datasets:[{
-
+label: "Performance Results",
 data:[res.cycles,res.time],
 backgroundColor:["#3b82f6","#22c55e"]
 
 }]
 
+}
+
+const chartOptions = {
+  plugins: {
+    legend: { display: false }
+  }
 }
 
 return(
@@ -223,9 +234,9 @@ Calculate
 <div className="result-card">
 
 <p>Cycles: {res.cycles.toFixed(2)}</p>
-<p>CPU Time: {res.time.toFixed(6)}</p>
+<p>CPU Time: {res.time.toFixed(8)} s</p>
 
-<Bar data={chartData}/>
+<Bar data={chartData} options={chartOptions}/>
 
 </div>
 
@@ -248,9 +259,13 @@ const calc=()=>{
 const v1=parseFloat(t1)
 const v2=parseFloat(t2)
 
-const ratio=(v1>v2?v1/v2:v2/v1).toFixed(2)
-
-setRes(`${v1<v2?"CPU1":"CPU2"} faster ${ratio}x`)
+// แก้บั๊กตรงนี้แหละโบร
+if(v1 === v2){
+  setRes(t.equal) 
+} else {
+  const ratio=(v1>v2?v1/v2:v2/v1).toFixed(2)
+  setRes(`${v1<v2?"CPU1":"CPU2"} faster ${ratio}x`)
+}
 
 }
 
@@ -258,8 +273,8 @@ return(
 
 <div className="form-content">
 
-<input placeholder={t.cpu1} onChange={e=>setT1(e.target.value)}/>
-<input placeholder={t.cpu2} onChange={e=>setT2(e.target.value)}/>
+<input placeholder={t.cpu1} type="number" onChange={e=>setT1(e.target.value)}/>
+<input placeholder={t.cpu2} type="number" onChange={e=>setT2(e.target.value)}/>
 
 <button className="calc-button" onClick={calc}>
 Calculate
@@ -293,10 +308,10 @@ return(
 
 <div className="form-content">
 
-<input placeholder={t.portion}
+<input placeholder={t.portion} type="number"
 onChange={e=>setVals({...vals,f:e.target.value})}/>
 
-<input placeholder={t.speed}
+<input placeholder={t.speed} type="number"
 onChange={e=>setVals({...vals,s:e.target.value})}/>
 
 <button className="calc-button" onClick={calc}>
@@ -331,10 +346,10 @@ return(
 
 <div className="form-content">
 
-<input placeholder={t.cpi}
+<input placeholder={t.cpi} type="number"
 onChange={e=>setVals({...vals,cpi:e.target.value})}/>
 
-<input placeholder={t.clock}
+<input placeholder={t.clock} type="number"
 onChange={e=>setVals({...vals,ghz:e.target.value})}/>
 
 <button className="calc-button" onClick={calc}>
@@ -376,9 +391,9 @@ return(
 
 <div className="form-content">
 
-<input placeholder={t.alu} onChange={e=>setVals({...vals,a:e.target.value})}/>
-<input placeholder={t.mem} onChange={e=>setVals({...vals,b:e.target.value})}/>
-<input placeholder={t.branch} onChange={e=>setVals({...vals,c:e.target.value})}/>
+<input placeholder={t.alu} type="number" onChange={e=>setVals({...vals,a:e.target.value})}/>
+<input placeholder={t.mem} type="number" onChange={e=>setVals({...vals,b:e.target.value})}/>
+<input placeholder={t.branch} type="number" onChange={e=>setVals({...vals,c:e.target.value})}/>
 
 <button className="calc-button" onClick={calc}>
 Calculate
@@ -406,7 +421,9 @@ const [time,setTime]=useState('')
 
 const add=()=>{
 
-setCpus([...cpus,{name,time:parseFloat(time)}])
+if(name && time){
+  setCpus([...cpus,{name,time:parseFloat(time)}])
+}
 
 }
 
@@ -417,12 +434,13 @@ return(
 <div className="form-content">
 
 <input placeholder={t.name} onChange={e=>setName(e.target.value)}/>
-<input placeholder={t.time} onChange={e=>setTime(e.target.value)}/>
+<input placeholder={t.time} type="number" onChange={e=>setTime(e.target.value)}/>
 
 <button className="calc-button" onClick={add}>
 {t.add}
 </button>
 
+{sorted.length > 0 &&
 <div className="result-card">
 
 {sorted.map((c,i)=>(
@@ -430,6 +448,7 @@ return(
 ))}
 
 </div>
+}
 
 </div>
 
